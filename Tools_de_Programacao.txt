@@ -1,0 +1,1257 @@
+### Tools ###
+
+-> como fazer o botao SAlvar e CAncelar ocultos e fazer eles
+aparecerem apos clicar no botão Editar:
+
+<input class='btn btn-sm btn-primary' id='btnEditar' href='javascript:;' type='button' value='Editar'>
+                               
+<input class='btn btn-success btn-primary' id='btnSalvar' href='javascript:;' type='hidden' value='Salvar'>
+                                
+<input class='btn btn-sm btn-danger' id='btnCancelar' href='javascript:;' type='hidden' value='Cancelar'>
+
+<script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#idEntrada").prop('type', 'hidden');
+            $("#idDataAtacado").prop('type', 'hidden');
+            $("#idDataVarejo").prop('type', 'hidden');
+        });
+
+        $("#btnEditar").click(function () {
+            $("#idEntrada").prop('type', 'text');
+            $("#idDataAtacado").prop('type', 'date');
+            $("#idDataVarejo").prop('type', 'date');
+            var linha = $(this).closest("tr");
+            $("td", linha).each(function () {
+                if ($(this).find(".text").length > 0) {
+                    $(this).find(".text").show();
+                    $(this).find(".label").hide();
+                }
+            });
+            $(this).hide();
+            $("#btnSalvar").prop('type', 'button');
+            $("#btnCancelar").prop('type', 'button');
+            $("#btnCancelar").show();
+            $("#btnSalvar").show();
+
+        });
+
+
+        $("#btnSalvar").click(function () {
+            var linha = $(this).closest("tr");
+            $("td", linha).each(function () {
+                if ($(this).find(".text").length > 0) {
+                    var span = $(this).find(".label");
+                    var input = $(this).find(".text");
+                    span.html(input.val());
+                    span.show();
+                    input.hide();
+                }
+            });
+            linha.find("#btnEditar").show();
+            $(this).hide();
+            $("#btnCancelar").prop('type', 'hidden');
+            $("#btnEditar").show();
+
+            var entradas = {};
+            entradas.Id = linha.find(".Id").find(".label").html();
+            entradas.Grife = linha.find(".Grife").find(".label").html();
+            entradas.Colecao = linha.find(".Colecao").find(".label").html();
+            entradas.Entrada = linha.find(".Entrada").find(".label").html();
+            entradas.DataAtacado = linha.find(".DataAtacado").find(".label").html();
+            entradas.DataVarejo = linha.find(".DataVarejo").find(".label").html();
+
+            if (entradas.Entrada != null &&
+                entradas.DataAtacado != null &&
+                entradas.DataVarejo != null) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Planejamento/Salvar",
+                    data: '{entradas:' + JSON.stringify(entradas) + '}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json"
+                });
+
+            } else {
+
+                alert("Os campos Entrada, Data do Atacado e Data do Varejo devem estar preenchidos para salvar!");
+            }
+        });
+
+        $("#btnCancelar").click(function () {
+            var linha = $(this).closest("tr");
+            $("td", linha).each(function () {
+                if ($(this).find(".text").length > 0) {
+                    var span = $(this).find(".label");
+                    var input = $(this).find(".text");
+                    input.val(span.html());
+                    span.show();
+                    input.hide();
+                }
+            });
+            $("#btnCancelar").prop('type', 'hidden');
+            $("#btnSalvar").prop('type', 'hidden');
+            $("#btnEditar").show();
+            $(this).hide();
+        });
+    </script>
+################################################################################################################################
+-> Como separar uma string em 2 partes, com base num caracter especifico:
+
+Dor: separar o nome da pessoa do email ayrton@email.com.br
+
+ string[] separandoNomeDoEmail = usuarioLote.Split("@");
+            string retirandoNome = separandoNomeDoEmail[0];
+            string[] separarNomeDeSobreNome = retirandoNome.Split(".");
+            string nome = separarNomeDeSobreNome[0];
+            string sobreNome = separarNomeDeSobreNome[1];
+            string nomeUsuarioPlanilha = $"{char.ToUpper(nome[0])}{nome.Substring(1)} {char.ToUpper(sobreNome[0])}{sobreNome.Substring(1)}";
+
+-> Ou na forma de um método:
+
+ public string SplitString(string value)
+    {
+        var result = value.Split("/")[4];
+        return result;
+    }
+
+-> Evolução da classe:
+
+public static class SplitEmailUserExtension
+    {
+        public static string SplitEmailUser(this string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return string.Empty;
+            var splitEmail = email.Split('@');
+            return splitEmail[0];
+        }
+    }
+##################################################################################################################################
+-> Como recarregar página no Javascript com timeout
+
+setTimeout(function () {
+window.location.reload(true);
+}, 1500);
+##################################################################################################################################
+-> Criar botão on/off, ou seja, clica ele faz x, clica de novo faz y:
+
+<button id="selFiltro1" value="lacrado" class="@(Model.Parametros.Filtro == "lacrado" ? "btn-filtro" : "")">Lacrado&nbsp;</button>
+
+        $("#selFiltro1").on('click', function () {
+                if ($('#@Html.IdFor(model => model.Parametros.Filtro)').val() == 'lacrado') {
+                    $('#@Html.IdFor(model => model.Parametros.Filtro)').attr('value', '')
+                } else {
+                    $('#@Html.IdFor(model => model.Parametros.Filtro)').attr('value', $("#selFiltro1").attr("value"))
+                }
+        });
+##################################################################################################################################
+-> Lendo excel em memória
+
+//using (ExcelPackage package = new ExcelPackage(arquivo.InputStream))
+//{
+//    var currentSheet = package.Workbook.Worksheets;
+//    var workSheet = currentSheet.First();
+//    int colCount = workSheet.Dimension.End.Column;  //get Column Count
+//    int rowCount = workSheet.Dimension.End.Row;     //get row count
+//    for (int row = 1; row <= rowCount; row++)
+//    {
+//        for (int col = 1; col <= colCount; col++)
+//        {
+//            var ver = " Row:" + row + " column:" + col + " Value:" + workSheet.Cells[row, col].Value?.ToString().Trim();
+//        }
+//    }
+
+//    package.Save();
+//}
+##################################################################################################################################
+-> Como criar coluna no DataTables.js renderizando check
+
+{
+  targets: [x],
+  data: "Varejo",
+  render: function (data) {
+
+   if (data.Varejo == true) {
+   return '<i class="bi bi-check"></i>';
+                          }
+
+  return '<i class="bi bi-x"></i>';
+   }
+}
+#################################################################################################################################
+-> Mascara para Real (R$) em Javascript
+
+function MascaraReal(value) {
+            if (!value) {
+                return "";
+
+            } else {
+
+                var dado = value.toString();
+                dado = dado.replace('.', '').replace(',', '').replace(/\D/g, '')
+
+                const options = { minimumFractionDigits: 2 }
+                const result = new Intl.NumberFormat('pt-BR', options).format(
+                    parseFloat(dado) / 100
+                )
+
+                return 'R$ ' + result
+            }
+        }
+#################################################################################################################################
+-> O SelectListItem tem como passar Text e Value nele, para num DropDownList, aparecer o nome do dado mas quando for usar um
+$('#nomecampo option:selected').val() vir o Value e não o Text.
+
+Ex.:
+
+new SelectListItem()
+    {
+      Value = "ValorDoDado",
+      Text = "NomeDoDado"
+    }
+
+
+#################################################################################################################################
+-> Gerador de senha
+
+ public static class PasswordUtil
+    {
+        private const string ValidChars = "abcdefghijklmnopqrstuvwxyz1234567890@#$%¨&*()/?{}°ºª";
+        private const int MinPasswordLength = 8;
+        private const int MaxPasswordLength = 16;
+
+        public static string CreatePassword(int passwordLength)
+        {
+            return CreatePassword(passwordLength, DateTime.Now.Millisecond);
+        }
+
+        public static string CreatePassword(int passwordLength, int seed)
+        {
+            //Aqui pego o valor máximo de caracteres para gerar a senha
+            int maxlength = ValidChars.Length;
+
+            //Criamos um objeto do tipo randon
+            Random random = new Random(seed);
+
+            //Criamos a string que montaremos a senha
+            StringBuilder senha = new StringBuilder(passwordLength);
+
+            //Fazemos um for adicionando os caracteres a senha
+            for (int i = 0; i < passwordLength; i++)
+            {
+                senha.Append(ValidChars[random.Next(0, maxlength)]);
+            }
+
+            //retorna a senha
+            return senha.ToString();
+        }
+
+        public static string CreatePassword()
+        {
+            return CreatePassword(MinPasswordLength);
+        }
+
+        public static bool ValidatePassword(string password)
+        {
+            if (password.IsEmpty())
+            {
+                return false;
+            }
+
+            bool hasLetter = false;
+            bool hasNumber = false;
+
+            if (password.Length < MinPasswordLength || password.Length > MaxPasswordLength)
+            {
+                return false;
+            }
+
+            foreach (char letra in password)
+            {
+                if (char.IsLetter(letra))
+                {
+                    hasLetter = true;
+                }
+                else if (char.IsDigit(letra))
+                {
+                    hasNumber = true;
+                }
+                else
+                {
+                    //Do Nothing. Just to compliance SonarQube
+                }
+            }
+            return hasLetter && hasNumber;
+        }
+    }
+#################################################################################################################################
+-> Como criar um serviço de messageria no Service Bus 
+
+- Sender
+
+1 - Crie o domínio/entidade dos dados a serem enviados
+
+public class Dominio {
+
+public string? Dado1 {get; set;}
+
+public string? Dado2 {get; set;}
+
+public string? Dado3 {get; set;}
+
+}
+
+2 - Na camada de Infraestructure, crie uma pasta chamada Queue com 2 classes, a QueueExtensions e QueueSender:
+
+public static class QueueExtensions
+{
+    public static IServiceCollection AddServiceBusClient(this IServiceCollection services, IConfiguration configuration)
+    {
+        var serviceBusConnectionString = configuration.GetSection("ServiceBus")["ConnectionStrings"];
+        services.AddAzureClients(builder =>
+        {
+            builder.AddServiceBusClient(serviceBusConnectionString)
+                .WithName(ClientNames.IntegracaoVirtualAge)
+                .ConfigureOptions(options =>
+                {
+                    options.TransportType = ServiceBusTransportType.AmqpWebSockets;
+                });
+        });
+        return services;
+    }
+    
+    
+    public static IServiceCollection AddQueueSender(this IServiceCollection services)
+    {
+        services.AddSingleton<IQueueSender, QueueSender>();
+        return services;
+    }
+}
+
+public class QueueSender : IQueueSender // essa interface vai no Application do Service
+{
+    private readonly ServiceBusClient _serviceBusClient;
+    private readonly ILogServices _logServices;
+    private readonly ServiceBusSender _sender;
+    
+    public QueueSender(IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, ILogServices logServices)
+    {
+        _logServices = logServices;
+        _serviceBusClient = serviceBusClientFactory.CreateClient(ClientNames.IntegracaoVirtualAge);
+        _sender = _serviceBusClient.CreateSender(QueueNames.IntegracaoVirtualAge);
+
+    }
+    public async Task PublishMessageAsync(ServiceBusMessage message)
+    {
+        await _sender.SendMessageAsync(message);
+        _logServices.WriteMessage($"Messagem enviada para fila às: {DateTime.Now.ToString()}");
+    }
+}
+
+3 - Adicione ao conteiner de injeção de dependências o serviço que vai injetar a classe Queue:
+
+public static class ServerDIExtensions
+    {
+        public static IServiceCollection AddWorkerDependencyInjection(this IServiceCollection services, IConfiguration configuration) // adicione essa classe ao Program.cs
+        {
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseOracle(configuration.GetSection("ConnectionStrings")["Duda"]);
+            });
+            
+            services.AddServiceBusClient(configuration);
+            services.AddQueueSender();
+            services.AddBackgroundJobs(configuration);
+            services.AddMapping();
+
+            #region Application services //servicos que utilizarão o Queue
+
+            services.AddScoped<IEstoqueProdEntServices, EstoqueProdEntServices>();
+            services.AddScoped<IEstoqueRetMatKardexService, EstoqueRetMatKardexService>();
+            services.AddScoped<IIntegrationScheduler, IntegrationScheduler>();
+            services.AddScoped<IEstoqueSaiKardexServices, EstoqueSaiKardexServices>();
+            services.AddScoped<IRomaneioSaiOpServices, RomaneioSaiOpServices>();
+            services.AddScoped<IMaterialService, MaterialServices>();
+            services.AddScoped<IEntradaNfCompraService, EntradaNfCompraService>();
+            services.AddScoped<IRstRomaneioBaixaServices, RstRomaneioBaixaServices>();
+
+            #endregion            
+            
+            #region Repositórios
+
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+
+            #endregion
+            
+            return services;
+        }
+    }
+
+4 - No projeto Shared, ter uma pasta com nome Messaging, tendo duas classes,
+ClientNames e QueueNames.cs:
+
+public static class ClientNames
+{
+    public const string IntegracaoVirtualAge = nameof(IntegracaoVirtualAge); //exemplo
+}
+
+public static class QueueNames
+{
+    /// <summary>
+    /// Nome da fila no Azure.
+    /// </summary>
+    public const string IntegracaoVirtualAge = "integracaovirtualage";
+}
+
+5 - Ter na camada de Application, uma pasta chamada Queue com a classe interface
+IQueueSender.cs
+
+public interface IQueueSender
+{
+    Task PublishMessageAsync(ServiceBusMessage message);
+}
+
+6 - Criar classe de Service para trabalhar com os dados. Exemplo a seguir:
+
+ public class EstoqueSaiKardexServices : IEstoqueSaiKardexServices
+    {
+        private readonly IRepository<ViewSaiKardex> _estoqueSaiKardex;
+        private readonly IRepository<ViewSai1Kardex> _estoqueSai1Kardex;
+        private readonly ILogServices _logServices;
+        private readonly IQueueSender _queueSender;
+
+        public EstoqueSaiKardexServices(
+            ILogServices logServices, IQueueSender queueSender, IRepository<ViewSaiKardex> estoqueSaiKardex,
+            IRepository<ViewSai1Kardex> estoqueSai1Kardex)
+        {
+            _logServices = logServices;
+            _queueSender = queueSender;
+            _estoqueSaiKardex = estoqueSaiKardex;
+            _estoqueSai1Kardex = estoqueSai1Kardex;
+        }
+
+        public async Task SendEstoqueSaiKardexIntegrationToQueueAsync()
+        {
+            int qtdPartition = 150;
+            List<ViewSaiKardex>? estoqueSaiKardex = await _estoqueSaiKardex.GetAllAsync();
+            List<ViewSai1Kardex>? estoqueSai1Kardex = await _estoqueSai1Kardex.GetAllAsync();
+
+            if (estoqueSaiKardex is not null && estoqueSai1Kardex is not null && estoqueSaiKardex.Count > 0 && estoqueSai1Kardex.Count > 0)
+            {
+                List<List<ViewSaiKardex>> partialEstoqueSaiKardec = estoqueSaiKardex.Partition(qtdPartition).ToList();
+                List<List<ViewSai1Kardex>> partialEstoqueSai1Kardec =
+                    estoqueSai1Kardex.Partition(qtdPartition).ToList();
+
+                int listaComMaiorQuantidade = partialEstoqueSaiKardec.Count > partialEstoqueSai1Kardec.Count
+                    ? partialEstoqueSaiKardec.Count
+                    : partialEstoqueSai1Kardec.Count;
+
+                for (int i = 0; i < listaComMaiorQuantidade; i++)
+                {
+                    bool ultimoDaLista = i == listaComMaiorQuantidade - 1;
+
+                    List<ViewSaiKardex> sendEstoqueSaiKardex = partialEstoqueSaiKardec.Count > i
+                        ? partialEstoqueSaiKardec[i]
+                        : new List<ViewSaiKardex>();
+                    List<ViewSai1Kardex> sendEstoqueSai1Kardex = partialEstoqueSai1Kardec.Count > i
+                        ? partialEstoqueSai1Kardec[i]
+                        : new List<ViewSai1Kardex>();
+
+                    EstoqueSaiKardexDomain estoqueSaiKardexAggregate = new EstoqueSaiKardexDomain(
+                        IntegrationNames.EstoqueSaiKardex,
+                        sendEstoqueSaiKardex, sendEstoqueSai1Kardex);
+
+                    ServiceBusMessage message =
+                        new(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(estoqueSaiKardexAggregate)));
+
+                    message.ApplicationProperties.Add("IntegrationName", IntegrationNames.EstoqueSaiKardex);
+                    message.ApplicationProperties.Add("UltimoDaLista", ultimoDaLista);
+                    _logServices.WriteMessage(
+                        $"Enviando lote numero {i + 1} de {listaComMaiorQuantidade} com {qtdPartition} itens para fila...");
+                    await _queueSender.PublishMessageAsync(message);
+                }
+            }
+
+            _logServices.WriteMessage(
+                @$"Finalizado o envio dos dados das views da integracao {IntegrationNames.EstoqueSaiKardex}. 
+                                      Total de dados da view V_INT_ESTOQUE_SAI_KARDEX: {(estoqueSaiKardex is null ? 0 : estoqueSaiKardex.Count)}.
+                                      Total de dados da view V_INT_ESTOQUE_SAI1_KARDEX: {(estoqueSai1Kardex is null ? 0 : estoqueSai1Kardex.Count)}");
+        }
+    }
+
+- Receiver
+
+
+
+##########################################################################################################33333
+-> Classe estática para limitar tamanho de string a um dado valor inteiro
+
+public static class StringLimitExtensions
+    {
+        /// <summary>
+        /// Método que verifica o tamanho de uma string e se passar do limite estabelecido, a reduz.
+        /// </summary>
+        /// <param name="source">String a se analisar.</param>
+        /// <param name="maxLength">Tamanho máximo da string.</param>
+        public static string LimitLength(string source, int maxLength)
+        {
+            if (string.IsNullOrEmpty(source))
+            {
+                return "Sem dados";
+            }
+
+            return source.Length <= maxLength ? source : source[..maxLength];
+        }
+    }
+
+##########################################################################################################
+-> Classe para medir tempo de execução de um método
+
+public static class BenchmarkExtensions
+    {
+        public static long Benchmark(this Action action)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            action();
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+
+	    // para deixar o tempo formatado certinho
+   	    TimeSpan ts = watch.Elapsed;
+	    string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+
+            watch.Restart();
+
+            return elapsedMs;
+        }
+    }
+##########################################################################################################
+-> SQL - Frame para ser usado em procedures, tendo rollback para caso a transação der erro a transação seja desfeita
+
+CREATE PROCEDURE SP_NomeDaProcedure
+(
+        @Xpto INT
+)
+AS
+BEGIN
+    BEGIN TRANSACTION
+		BEGIN TRY
+
+			--Seu script para procedure vai aqui
+
+		 IF @@TRANCOUNT > 0 COMMIT TRANSACTION
+
+		END TRY
+
+		BEGIN CATCH
+			IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
+			DECLARE @ERRORMESSAGE VARCHAR(4000)
+        	SELECT @ERRORMESSAGE = ERROR_MESSAGE()
+        	RAISERROR(@ERRORMESSAGE, 16, 1)
+		END CATCH
+END
+GO
+##############################################################################################################
+-> SQL - Trigger que grava log de tudo que for inserido ou alterado em uma tabela
+
+-- Trigger para capturar todas as alterações feitas na tabela BIZ_PROJETO
+
+-- Criando a tabela com a mesma estrutura da original, mas adicionando colunas de controle
+IF (OBJECT_ID('ProjetoHistorico_Log') IS NOT NULL) DROP TABLE ProjetoHistorico_Log
+CREATE TABLE ProjetoHistorico_Log (
+    Id_Log INT IDENTITY(1, 1),
+    Dt_Atualizacao DATETIME DEFAULT GETDATE(),
+    [Login] VARCHAR(100),
+    Hostname VARCHAR(100),
+    Operacao VARCHAR(20),
+
+    -- Dados da tabela original
+	ID INT,
+	ENTRADA INT,
+	LINHA INT,
+	GRUPO INT,
+	TIPODESENVPRODUTO INT
+)
+GO
+
+IF ((SELECT COUNT(*) FROM sys.triggers WHERE name = 'trgHistorico_Projeto' AND parent_id = OBJECT_ID('BIZ_PROJETO')) > 0) DROP TRIGGER trgHistorico_Projeto
+GO
+
+CREATE TRIGGER trgHistorico_Projeto ON BIZ_PROJETO -- Tabela que a trigger será associada
+AFTER INSERT, UPDATE, DELETE AS
+BEGIN
+    
+    SET NOCOUNT ON
+
+    DECLARE 
+        @Login VARCHAR(100) = SYSTEM_USER, 
+        @HostName VARCHAR(100) = HOST_NAME(),
+        @Data DATETIME = GETDATE()
+        
+
+    IF (EXISTS(SELECT * FROM Inserted) AND EXISTS (SELECT * FROM Deleted))
+    BEGIN
+        
+		-- Grava os dados antigos alterados pelo UPDATE
+        INSERT INTO ProjetoHistorico_Log
+        SELECT @Data, @Login, @HostName, 'UPDATE', ID, ENTRADA, LINHA, GRUPO, TIPODESENVPRODUTO
+        FROM Deleted
+
+    END
+    ELSE BEGIN
+
+        IF (EXISTS(SELECT * FROM Inserted))
+        BEGIN
+
+            INSERT INTO ProjetoHistorico_Log
+            SELECT @Data, @Login, @HostName, 'INSERT', ID, ENTRADA, LINHA, GRUPO, TIPODESENVPRODUTO
+            FROM Inserted
+
+        END
+        ELSE BEGIN
+
+            INSERT INTO ProjetoHistorico_Log
+            SELECT @Data, @Login, @HostName, 'DELETE', ID, ENTRADA, LINHA, GRUPO, TIPODESENVPRODUTO
+            FROM Deleted
+
+        END
+
+    END
+
+END
+GO
+#####################################################################################################
+-> Ideia
+
+Uma boa ideia é usar uma classe estática para armazenar strings, ao invés de usar um enum, que é chato de
+trazer a parte string.
+
+Ex.:
+
+public static class ClasseQueGuardaStrings
+{
+
+    public const string Dado = "qualquercoisa"
+}
+#####################################################################################################
+-> método para tirar caracteres especiais em c#
+
+public static string RemoveSpecialCharacters(this string str)
+		{
+			var simbols = "\"'!@#$%¨&*()-_+=[{`´çÇ^~}]<,>.:;?/|\\".ToCharArray();
+			var letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+			var numbers = "0123456789".ToCharArray();
+
+			var sb = new System.Text.StringBuilder();
+			foreach (char c in str)
+			{
+				if (letters.Contains(c) || numbers.Contains(c) || simbols.Contains(c) || c == ' ')
+				{
+					sb.Append(c);
+				}
+			}
+			return sb.ToString();
+		}
+#######################################################################################################
+-> Método para converter data UTC para Time Zone do Brasil
+
+public static DateTime ConvertUTCDataInBrasilData(DateTime data)
+        {
+			var timeZoneBrasil = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+			
+			var retorno = TimeZoneInfo.ConvertTimeFromUtc(data, timeZoneBrasil);
+			
+			return retorno;
+
+			//var timeLista = TimeZoneInfo.GetSystemTimeZones(); verificação dos IDs disponiveis no servidor para converter TimeZones
+		}
+
+-> Método sugerido pelo GPT:
+
+using System;
+
+public DateTime ConverterParaHorarioSaoPaulo(DateTime horarioAtual)
+{
+    try
+    {
+        TimeZoneInfo saoPauloTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+        DateTime horarioSaoPaulo = TimeZoneInfo.ConvertTime(horarioAtual, saoPauloTimeZone);
+        return horarioSaoPaulo;
+    }
+    catch (TimeZoneNotFoundException)
+    {
+        // Tratamento para quando o fuso horário não for encontrado
+        Console.WriteLine("Fuso horário não encontrado. Retornando o horário atual sem conversão.");
+        return horarioAtual;
+    }
+}
+
+
+############################################################################################################
+-> Método para verificar se objeto é null
+
+    public static bool IsEmptyEntity<T>(T obj)
+    {
+        foreach (var property in typeof(T).GetProperties())
+            if (property.GetValue(obj, null) != null)
+                return false;
+        return true;
+    }
+
+############################################################################################################
+-> Método para alterar largura e altura de imagem
+
+public static Image FixedSize(Image imgPhoto, int width, int height)
+        {
+            int sourceWidth = imgPhoto.Width;
+            int sourceHeight = imgPhoto.Height;
+            int sourceX = 0;
+            int sourceY = 0;
+            int destX = 0;
+            int destY = 0;
+
+            float nPercent = 0;
+            float nPercentW = 0;
+            float nPercentH = 0;
+
+            nPercentW = ((float)width / (float)sourceWidth);
+            nPercentH = ((float)height / (float)sourceHeight);
+            if (nPercentH < nPercentW)
+            {
+                nPercent = nPercentH;
+                destX = System.Convert.ToInt16((width -
+                              (sourceWidth * nPercent)) / 2);
+            }
+            else
+            {
+                nPercent = nPercentW;
+                destY = System.Convert.ToInt16((height -
+                              (sourceHeight * nPercent)) / 2);
+            }
+
+            int destWidth = (int)(sourceWidth * nPercent);
+            int destHeight = (int)(sourceHeight * nPercent);
+
+            Bitmap bmPhoto = new Bitmap(width, height,
+                              PixelFormat.Format24bppRgb);
+            bmPhoto.SetResolution(imgPhoto.HorizontalResolution,
+                             imgPhoto.VerticalResolution);
+
+            Graphics grPhoto = Graphics.FromImage(bmPhoto);
+            grPhoto.Clear(Color.Red);
+            grPhoto.InterpolationMode =
+                    InterpolationMode.HighQualityBicubic;
+
+            grPhoto.DrawImage(imgPhoto,
+                new Rectangle(destX, destY, destWidth, destHeight),
+                new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight),
+                GraphicsUnit.Pixel);
+
+            grPhoto.Dispose();
+            return bmPhoto;
+        }
+############################################################################################3
+-> Vários tipos de scripts em C# que formata strings
+
+public static class StringExtensionMethods
+    {
+        private static readonly int Ascii7bitMaxValue = 127;
+
+        /// <summary>
+        ///     Formata um Telefone com a máscara (00) 00000-0000 ou (00) 0000-0000
+        /// </summary>
+        /// <param name="phone">string phone</param>
+        /// <returns></returns>
+        public static string ToPhoneFormat(this string phone)
+        {
+            if (!phone.IsEmpty())
+            {
+                phone = phone.Trim();
+
+                MaskedTextProvider mtpPhone;
+                if (phone.Length == 11)
+                {
+                    mtpPhone = new MaskedTextProvider(@"\(00\) 00000\-0000");
+                    mtpPhone.Set(phone.PadLeft(11, '0'));
+                }
+                else if (phone.Length == 13)
+                {
+                    mtpPhone = new MaskedTextProvider(@"\(00\) 0000000\-0000");
+                    mtpPhone.Set(phone.PadLeft(11, '0'));
+                }
+                else
+                {
+                    mtpPhone = new MaskedTextProvider(@"\(00\) 0000\-0000");
+                    mtpPhone.Set(phone.PadLeft(10, '0'));
+                }
+
+                return mtpPhone.ToString();
+            }
+
+            return null;
+        }
+        
+        public static string SubstringOrComplete(this string data, int length, char complement)
+        {
+            if (data.Length > length)
+            {
+                return data.Substring(0, length);
+            }
+            else
+            {
+                return data.PadRight(length, complement);
+            }
+        }
+
+        /// <summary>
+        /// Retorna string sem acentuação e em lowercase
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static string ToLowerWithoutDiacritics(this string s)
+        {
+            var normalizedString = s.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString.Where(c =>
+                CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark))
+            {
+                stringBuilder.Append(c);
+            }
+
+            return stringBuilder.ToString().ToLower();
+        }
+
+        public static string RemoveLeadingZeros(this string value)
+        {
+            return value == null ? value : value.TrimStart('0');
+        }
+
+        /// <summary>
+        ///     Formata um CPF com a máscara 000.000.000-00
+        /// </summary>
+        /// <param name="cpf">string Cpf</param>
+        /// <returns></returns>
+        public static string ToCPFFormat(this string cpf)
+        {
+            if (!cpf.IsEmpty())
+            {
+                cpf = cpf.Trim();
+
+                var mtpCpf = new MaskedTextProvider(@"000\.000\.000-00");
+                mtpCpf.Set(cpf.PadLeft(11, '0'));
+                return mtpCpf.ToString();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     Formata um CNPJ com a máscara 00.000.000/0000-00
+        /// </summary>
+        /// <param name="cnpj">string Cnpj</param>
+        /// <returns></returns>
+        public static string ToCNPJFormat(this string cnpj)
+        {
+            if (!cnpj.IsEmpty())
+            {
+                cnpj = cnpj.Trim();
+
+                var mtpCnpj = new MaskedTextProvider(@"00\.000\.000/0000-00");
+                mtpCnpj.Set(cnpj.PadLeft(14, '0'));
+                return mtpCnpj.ToString();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     Formata um CEP com a máscara 00.000-00
+        /// </summary>
+        /// <param name="cnpj">string CEP</param>
+        /// <returns></returns>
+        public static string ToCEPFormat(this string cep)
+        {
+            if (!cep.IsEmpty())
+            {
+                var mtpCEP = new MaskedTextProvider(@"00000-000");
+                mtpCEP.Set(cep.PadLeft(8, '0'));
+                return mtpCEP.ToString();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Formata uma inscricao estadual com a máscara 000.000.000.000
+        /// </summary>
+        /// <param name="insc">string inscricaoEstadual</param>
+        /// <returns></returns>
+        public static string ToInscricaoEstadualFormat(this string insc)
+        {
+            if (!insc.IsEmpty())
+            {
+                insc = insc.Trim();
+
+                var mtpInsc = new MaskedTextProvider(@"000\.000\.000\.000");
+                mtpInsc.Set(insc.PadLeft(12, '0'));
+                return mtpInsc.ToString();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Preserva apenas números da string
+        /// </summary>
+        /// <param name="texto">string texto</param>
+        /// <returns></returns>
+        public static string OnlyNumber(this string texto)
+        {
+            return texto.IsEmpty() ? null : new string(texto.Where(char.IsDigit).ToArray());
+        }
+
+        /// <summary>
+        ///     Valida um CNPJ passado como parâmetro
+        /// </summary>
+        /// <param name="cnpj">CNPJ a ser validado</param>
+        /// <returns>True/False</returns>
+        public static bool IsValidCNPJ(this string cnpj)
+        {
+            if (string.IsNullOrEmpty(cnpj))
+                return false;
+
+            var multiplicador1 = new int[12] { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+            var multiplicador2 = new int[13] { 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+            int soma;
+            int resto;
+            string digito;
+            string tempCnpj;
+            cnpj = cnpj.Trim().OnlyNumber();
+
+            if (cnpj.Length != 14)
+                return false;
+
+            tempCnpj = cnpj.Substring(0, 12);
+            soma = 0;
+
+            for (int i = 0; i < 12; i++)
+                soma += int.Parse(tempCnpj[i].ToString()) * multiplicador1[i];
+
+            resto = (soma % 11);
+            if (resto < 2)
+                resto = 0;
+            else
+                resto = 11 - resto;
+            digito = resto.ToString();
+
+            tempCnpj = tempCnpj + digito;
+            soma = 0;
+
+            for (int i = 0; i < 13; i++)
+                soma += int.Parse(tempCnpj[i].ToString()) * multiplicador2[i];
+
+            resto = (soma % 11);
+            if (resto < 2)
+                resto = 0;
+            else
+                resto = 11 - resto;
+
+            digito = digito + resto;
+            return cnpj.EndsWith(digito);
+        }
+
+        /// <summary>
+        ///     Valida um CPF passado como parâmetro
+        /// </summary>
+        /// <param name="cpf">CPF a ser validado</param>
+        /// <returns>Tue/False</returns>
+        public static bool IsValidCPF(this string cpf)
+        {
+            if (string.IsNullOrEmpty(cpf))
+                return false;
+
+            var multiplicador1 = new int[9] { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+            var multiplicador2 = new int[10] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+            int cont = 0;
+            for (int c = 0; c < cpf.Length; c++)
+            {
+                if (cpf.Substring(c, 1) == cpf.Substring(cpf.Length - 1))
+                    cont++;
+            }
+
+            if (cont == 11)
+                return false;
+
+            string tempCpf;
+            string digito;
+            int soma;
+            int resto;
+            cpf = cpf.Trim().OnlyNumber();
+
+            if (cpf.Length != 11)
+                return false;
+
+            tempCpf = cpf.Substring(0, 9);
+            soma = 0;
+
+            for (int i = 0; i < 9; i++)
+                soma += int.Parse(tempCpf[i].ToString()) * multiplicador1[i];
+
+            resto = soma % 11;
+            if (resto < 2)
+                resto = 0;
+            else
+                resto = 11 - resto;
+
+            digito = resto.ToString();
+            tempCpf = tempCpf + digito;
+            soma = 0;
+
+            for (int i = 0; i < 10; i++)
+                soma += int.Parse(tempCpf[i].ToString()) * multiplicador2[i];
+
+            resto = soma % 11;
+            if (resto < 2)
+                resto = 0;
+            else
+                resto = 11 - resto;
+            digito = digito + resto;
+
+            return cpf.EndsWith(digito);
+        }
+
+
+        /// <summary>
+        ///     Verifica a validade da senha
+        /// </summary>
+        /// <param name="password">string password</param>
+        /// <returns>bool that represents the validation</returns>
+        public static bool IsValidPassword(this string password)
+        {
+            if (password.IsEmpty())
+                return false;
+
+            bool hasLetter = false;
+            bool hasNumber = false;
+
+            if (password.Length < 6 || password.Length > 16) return false;
+            foreach (char letra in password)
+            {
+                if (char.IsLetter(letra))
+                {
+                    hasLetter = true;
+                }
+                else if (char.IsDigit(letra))
+                {
+                    hasNumber = true;
+                }
+            }
+
+            return hasLetter && hasNumber;
+        }
+
+        /// <summary>
+        ///     Verifica a validade do e-mail
+        /// </summary>
+        /// <param name="email">string email</param>
+        /// <returns></returns>
+        public static bool IsValidEmail(this string email)
+        {
+            return new EmailAddressAttribute().IsValid(email);
+        }
+
+        /// <summary>
+        ///     Verifica a validade de cartões de crédito
+        /// </summary>
+        /// <param name="NumeroCartao">string creditCardNumber</param>
+        /// <returns>bool</returns>
+        public static bool IsValidCard(this string creditCardNumber)
+        {
+            if (string.IsNullOrEmpty(creditCardNumber))
+            {
+                return false;
+            }
+
+            int sumOfDigits = creditCardNumber.Where((e) => e >= '0' && e <= '9')
+                .Reverse()
+                .Select((e, i) => ((int)e - 48) * (i % 2 == 0 ? 1 : 2))
+                .Sum((e) => e / 10 + e % 10);
+            return sumOfDigits % 10 == 0;
+        }
+
+        /// <summary>
+        ///     Replica a string
+        /// </summary>
+        /// <param name="count">Quantidade de repetições</param>
+        /// <returns>String replicada</returns>
+        public static string DupeString(this string input, int? count)
+        {
+            string result = string.Empty;
+            while (count-- > 0)
+                result += input;
+
+            return result;
+        }
+
+        public static string Truncate(this string value, int maxChars)
+        {
+            return value.Length <= maxChars ? value : value.Substring(0, maxChars);
+        }
+
+        /// <summary>
+        /// Remove acentos da string
+        /// </summary>
+        /// <param name="text">String de entrada</param>
+        /// <returns>String sem acentos</returns>
+        public static string RemoveDiacritics(this string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return text;
+
+            text = text.Normalize(NormalizationForm.FormD);
+            var chars = text.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                .ToArray();
+            return new string(chars).Normalize(NormalizationForm.FormC);
+        }
+
+        /// <summary>
+        /// Retira os caracteres que não sejam unicode de uma string
+        /// </summary>
+        /// <param name="value"></param>
+        public static string NormalizarUnicode(this string value)
+        {
+            var normalizedValue = "";
+            foreach (var caracter in value)
+            {
+                if (caracter < Ascii7bitMaxValue)
+                {
+                    normalizedValue = normalizedValue + caracter;
+                }
+            }
+
+            return normalizedValue;
+        }
+
+        public static bool IsValidPhone(this string phone)
+        {
+            if (phone.IsEmpty()) return false;
+            var numericPhone = new string(phone.Where(char.IsDigit).ToArray());
+            return numericPhone.Length >= 10 && numericPhone.Length <= 11;
+        }
+
+        /// <summary>
+        /// Converte caracteres especiais para não especiais
+        /// Joga o email para lowercase
+        /// </summary>
+        /// <param name="email"></param>
+        public static string NormalizarEmail(this string email)
+        {
+            if (email.IsEmpty()) return null;
+            var normalized = new string(email.ToLower().Trim()
+                .Normalize(NormalizationForm.FormD)
+                .Where(ch => char.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+                .ToArray());
+            return normalized;
+        }
+
+        public static bool ValidUrlWithProtocol(this string url)
+        {
+            var regex =
+                @"(https?:\/\/)(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)";
+            var matcher = new Regex(regex);
+            return matcher.Match(url).Success;
+        }
+
+        public static string Masked(this string source, int start, int count)
+        {
+            return source.Masked('*', start, count);
+        }
+
+        public static string Masked(this string source, char maskValue, int start, int count)
+        {
+            var firstPart = source.Substring(0, start);
+            var lastPart = source.Substring(start + count);
+            var middlePart = new string(maskValue, count);
+
+            return firstPart + middlePart + lastPart;
+        }
+
+        public static string MaskEmail(this string source)
+        {
+            var splitedMail = source.Split("@");
+            var primeiraParte = splitedMail.First();
+            return primeiraParte.Masked(2, primeiraParte.Length - 4) + "@" + splitedMail.Last();
+        }
+
+
+        /// <summary>
+        /// Cria um sequêncial de ocorrência com RPM + 8 dígitos
+        /// </summary>
+        /// <param name="sequencial"></param>
+        /// <returns></returns>
+        public static string CreateOccurrenceRPM(int sequencial)
+        {
+            string numeroFormatado = sequencial.ToString().PadLeft(8, '0');
+            string resultado = $"RPM{numeroFormatado}";
+
+            if (Convert.ToInt32(numeroFormatado) > 99999999)
+            {
+                return "valor excedido";
+            }
+            return resultado;
+        }
+    }
+##########################################################################################
+-> Exemplo de classe handler em C# que interceptar requests para um endpoint específico
+
+public class OcorrenciaTMSHandler : DelegatingHandler
+    {
+
+        private readonly IMemoryCache _cache;
+        private readonly IService _service;
+
+        public OcorrenciaTMSHandler(IMemoryCache cache, IService service)
+        {
+            _cache = cache;
+            _service = service;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            bool requiresAuthorization = IsAuthorizationRequired(request);
+
+            if (requiresAuthorization)
+            {
+                if (_cache.TryGetValue("NomeNoCacheDoToken", out string accessToken))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                }
+                else
+                {
+                    var token = await _service.GetTokenOcorrenciaTMS();
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+            }
+
+            return await base.SendAsync(request, cancellationToken);
+        }
+
+        private static bool IsAuthorizationRequired(HttpRequestMessage request)
+        {
+            if (request.RequestUri is null)
+            {
+                return false;
+            }
+
+            string requestPath = request.RequestUri.AbsolutePath;
+            bool isAuthorizationRequired = requestPath.StartsWith("/api/Token/GenerateToken");
+
+            return isAuthorizationRequired;
+        }
+    }
